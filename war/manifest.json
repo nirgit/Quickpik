@@ -1,0 +1,15 @@
+{
+  "name": "QuickPik",
+  "manifest_version": 1,
+  "version": "1.0",
+  "description": "Take a quick-peek into the web",
+  "browser_action": {
+    "default_icon": "qpik.png",
+    "default_popup": "ChromeGWTExt.html"
+  },
+  "permissions": [
+  ],
+   "web_accessible_resources": [
+    "quickpik/7FFFB7B9F6DECDB3AE26ADB8104F70D8.cache.html"
+  ]
+}
