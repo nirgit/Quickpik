@@ -22,7 +22,9 @@ class CSS {
 
 	final static String APP_TITLE 			= "app-title-label";
 
-	final static String THUMB 				= "thumb";
+	final static String THUMB 				= "thumbnail";
+	
+	final static String THUMB_IMG			= "thumbnail-img";
 	
 	final static String SELECTED_PHOTO		= "selected-thumb" ;
 

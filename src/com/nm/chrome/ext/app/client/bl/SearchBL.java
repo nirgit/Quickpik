@@ -1,8 +1,8 @@
 package com.nm.chrome.ext.app.client.bl;
 
-import com.nm.chrome.ext.app.client.datasource.FlickrDS;
-import com.nm.chrome.ext.app.client.datasource.GoogleImagesDS;
-import com.nm.chrome.ext.app.client.datasource.IImagesDataSource;
+import java.util.HashMap;
+
+import com.nm.chrome.ext.app.client.datasource.DataSource;
 import com.nm.chrome.ext.app.client.datasource.PhotoSearchResultCallback;
 import com.nm.chrome.ext.app.client.model.FilterLevel;
 import com.nm.chrome.ext.app.client.model.IMainPresenter;
@@ -13,14 +13,9 @@ import com.nm.chrome.ext.app.client.model.bl.ISearchBL;
  * @author nir
  */
 public class SearchBL implements ISearchBL {
+
+	private HashMap<DataSource, PhotoSearchResultCallback> callbacks = new HashMap<DataSource, PhotoSearchResultCallback>() ;
 	
-	private IImagesDataSource googleDS					= new GoogleImagesDS() ;
-	private IImagesDataSource flickrDS					= new FlickrDS() ;
-
-	// Create callbacks to process images!
-	private PhotoSearchResultCallback flickrCallback 	= null ;
-	private PhotoSearchResultCallback googleCallback 	= null ;
-
 	private final IMainPresenter mainPresenter ;
 	
 	/**
@@ -35,20 +30,29 @@ public class SearchBL implements ISearchBL {
 	 * @see ISearchBL#search(String, com.nm.chrome.ext.app.client.model.FilterLevel)
 	 */
 	public void search(String phrase, FilterLevel filter) {
-		flickrCallback = new PhotoSearchResultCallback(mainPresenter) ;
-		googleCallback = new PhotoSearchResultCallback(mainPresenter) ;
-		// Go get the images!
-		googleDS.getImages(phrase, filter, googleCallback);
-		flickrDS.getImages(phrase, filter, flickrCallback) ;
+		// remove old callbacks...
+		callbacks.clear() ;
+		for(DataSource ds : DataSource.values()) {
+			if(ds.isEnabled()){
+				PhotoSearchResultCallback callback = ds.createSearchCallback(mainPresenter) ;
+				callbacks.put(ds, callback) ;
+				// Go get the images!
+				ds.getSource().getImages(phrase, filter, callback) ;
+			}
+		}
 	}
 
 	/**
 	 * @see ISearchBL#searchMore(String)
 	 */
 	public void searchMore() {
-		String phrase 		= googleCallback.getLastResult().getSearch() ;
-		FilterLevel filter 	= googleCallback.getLastResult().getFilter() ;
-		googleDS.getImages(phrase, filter, googleCallback, googleCallback.getLastResult().getPage()) ;
+		for(DataSource dataSource : callbacks.keySet()) {
+			PhotoSearchResultCallback callback = callbacks.get(dataSource) ;
+			if(callback == null) continue ;
+			String phrase 		= callback.getLastResult().getSearch() ;
+			FilterLevel filter 	= callback.getLastResult().getFilter() ;
+			dataSource.getSource().getImages(phrase, filter, callback, callback.getLastResult().getPage()+1) ;
+		}
 	}
 	
 }

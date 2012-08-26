@@ -19,8 +19,8 @@ import com.nm.chrome.ext.app.client.model.Photo;
 import com.nm.chrome.ext.app.client.model.PhotosSearchResult;
 
 /**
- * Define FlickR as image data source.
- * @author nir
+ * Define FlickR as an image data source.
+ * @author Nir Moav
  */
 public class FlickrDS implements IImagesDataSource {
 
@@ -38,6 +38,7 @@ public class FlickrDS implements IImagesDataSource {
 	@Override
 	public void getImages(final String searchExpression, final FilterLevel filter, final Callback<PhotosSearchResult, Void> callback) {
 		MidResult midRes = new MidResult(callback) ;
+		midRes.setPage(1) ;
 		getImages(searchExpression, filter, midRes) ;
 	}
 	
@@ -69,7 +70,7 @@ public class FlickrDS implements IImagesDataSource {
 						String responseXMLText		= response.getText() ;
 						photos	= getPhotos(responseXMLText) ;
 					}
-					midRes.getCallback().onSuccess(new PhotosSearchResult(searchExpression, filter, photos, 0, false)) ;
+					midRes.getCallback().onSuccess(new PhotosSearchResult(searchExpression, filter, photos, midRes.getPage(), false)) ;
 				}
 				@Override
 				public void onError(Request request, Throwable exception) {
